@@ -1,0 +1,39 @@
+{{- $root := . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ template "chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: {{ .Values.ingress.ipName }}
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+spec:
+  backend:
+     serviceName: {{ template "fullname" . }}
+     servicePort: {{ .Values.service.port }}
+  
+  {{ if .Values.certificate.enabled -}}
+  tls:
+    - hosts: 
+      {{- range $domain := .Values.certificate.dns }}
+      - {{ $domain }}
+      {{- end }}
+      secretName: {{ .Values.certificate.name }}
+  {{- end }}
+
+  rules:
+  {{- range $domain := .Values.certificate.dns }}
+    - host: {{ $domain }}
+      http:
+          paths:
+            - path: /*
+              backend:
+                serviceName: {{ template "fullname" $root }}
+                servicePort: {{ $root.Values.service.port }}
+  {{- end }}

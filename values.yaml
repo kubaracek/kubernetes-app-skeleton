@@ -1,0 +1,27 @@
+your-app:
+  namespace: myapp-namespace
+  image:
+    repository: docker-repo-url
+    tag: docker-tag
+
+  service:
+    type: NodePort
+    name: permissions
+    port: 80
+    appPort: 8081 #App port inside the container
+
+  ingress:
+    ipName: myapp-static-ip
+    class: gce
+
+  certificate:
+    name: myapp-cert
+    enabled: true
+    issuer: letsencrypt-prod
+    commonName: myappurl.tld
+    dns:
+      - myappurl.tld
+
+  env:
+    vars:
+      ENV: "staging"

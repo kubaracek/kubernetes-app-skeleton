@@ -1,0 +1,24 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: {{ template "fullname" . }}-cert
+  namespace: {{ .Values.namespace }}
+spec:
+  secretName: {{ .Values.certificate.name }}
+  issuerRef:
+    kind: ClusterIssuer
+    name: {{ .Values.certificate.issuer }}
+  commonName: {{ .Values.certificate.commonName }}
+  dnsNames: 
+    {{- range $domain := .Values.certificate.dns }}
+    - '{{ $domain }}'
+    {{- end }}
+  acme:
+    config:
+    - dns01:
+        provider: route53
+      domains:
+        {{- range $domain := .Values.certificate.dns }}
+        - '{{ $domain }}'
+        - 'www.{{ $domain }}'
+        {{- end }}
